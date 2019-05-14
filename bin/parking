@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+require_relative '../lib/parking_lot'
+#require 'rspec'
+class Parking
+  attr_accessor :latest_parking_lot
+
+  def initialize
+
+  end
+
+  def call
+    process()
+  end
+
+  private
+
+  def process
+    if (ARGV.length > 0)
+      file_process
+    else
+      get_inputs_from_user
+    end
+  end
+
+  def get_inputs_from_user
+    loop do
+      input = gets
+      break if input.downcase == 'exit'
+      process_input(input)
+    end    
+  end
+
+  def file_process
+    begin
+      input = File.read(ARGV[0])
+    rescue StandardError => bang
+      puts "Error reading file #{ bang }"
+      return
+    end
+
+    begin
+      input.split("\n").each do |input|
+        process_input(input)
+      end
+    rescue StandardError => bang
+    puts "Error processing input. Error - #{ bang }"
+    end
+  end
+  
+  def process_input(input)
+    sliced_input = input.split(/\s/)
+    command = sliced_input[0]
+    if command == 'create_parking_lot'
+      no_of_slots = sliced_input[1]
+      @latest_parking_lot = ParkingLot.new(no_of_slots)
+    else
+      #The following line will just execute the command passed by passing the parameters
+      # as arguments
+      # i.e. latest_parking_lot.park(vehicle_no, vehicle_color)
+      @latest_parking_lot.send(command, *([sliced_input[1], sliced_input[2]].compact))
+    end
+  end
+end
+
+Parking.new().call
